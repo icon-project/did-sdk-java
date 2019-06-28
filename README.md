@@ -1,81 +1,77 @@
 
 ## DID-SDK-JAVA
 
-`ICON DID`를 생성/관리하고 `credential`, `presentation`을 발급하고 검증하기 위한 SDK입니다.
+This SDK is used not only to create and manage `ICON DID`, but also to issue and verify `credentials` and `presentations`.
 
 ## Quick Guide
-`ICON DID`를 이용하기 위해 `owner`, `issuer`, `verifier` 입장에서 각각 어떤 작업들을 수행하고, 이것을 어떻게 해야 하는지 간략하게 소개합니다.
+This section explains what kind of actions `owner`, `issuer`, and `verifier` typically perform in order to use `ICON DID`, and describes how to do them in a simple manner.
 
 ### Owner
-`owner`는 DID를 인증받는 주체이며, 개인의 정보를 다른 서버에 저장하지 않고 본인이 직접 가지고 있음으로써 자신의 개인정보를 보호할 수 있습니다.
- 
-`owner`가 해야 하는 작업과 그 방법은 다음과 같습니다. 
-1. DID 생성 (참고: [DID Document](#did-document))    
-1. Credential request 생성
-    - 인증 요청을 해당 `issuer`에게 보내어 신원 인증을 받습니다. (참고: [Credential Request](#credential-request))
-1. Presentation token 생성  
-    - `verifier`에게 presentation request를 받으면, `owner`는 presentation을 생성해서 `verifier`에게 전달합니다. (참고: [Presentation Token](#presentation-token)) 
+An `owner` is able to keep his/her personal information on himself/herself without storing it on a remote server, thus keeping it secure.
+
+The steps an `owner` must take are described below.
+1. Generate a DID (See: [DID Document](#did-document)) 
+1. Request a credential
+    - The owner sends a credential request to an `issuer` to claim his credential. (See: [Credential Request](#credential-request))'
+1. Generate a presentation 
+    - When an `owner` receives a presentation request from a `verifier`, he responds back with a `presentation`. (See: [Presentation](#presentation))
 
 ### Issuer
-`issuer`는 신원주의 요청에 따라, 신원을 인증하고 증명서를 발급해 줍니다.
+An `issuer`, upon receiving a request from an `owner`, verifies the `owner`'s identity and provides a certificate.
 
-`issuer`가 해야 하는 작업과 그 방법은 다음과 같습니다. 
-1. DID 생성 (참고: [DID Document](#did-document))  
-1. Credential request 검증  
-    - `owner`에게서 받은 인증 요청(credential request)에 대해서 정상적인 `owner`로부터 요청받은 것인지 검증합니다. (참고: [Request Verify](#request-verify))
-1. Credential 생성  
-    - 인증을 완료했다면, 이에 대한 `credential`을 생성해 줍니다. (참고: [Credential Token](#credential-token))
+The steps an `issuer` must take are described below
+1. Generate a DID (See: [DID Document](#did-document))
+1. Verify the credential request
+    - Upon receiving a credential request from an `owner`, the `issuer` verifies the request and validates his claims. (See : [Verifying Requests](#request-verification))
+1. Generate credentials
+    - Upon successful validation, the `issuer` creates and sends the corresponding `credential` to the `owner`. (See: [Credential](#credential))
 
 ### Verifier
-`verifier`는 서비스 제공을 위해 개인정보를 필요로 하는 주체이며, `owner`에게 인증서를 제공받아 검증합니다.
+A `verifier` is an entity that requires certain information from an `owner` in order to provide service.
 
-`verifier`가 해야 하는 작업과 그 방법은 다음과 같습니다. 
-1. DID 생성(참고: [DID Document](#did-document))  
-    - 기술적으로 `verifier`의 경우에는 DID가 반드시 필요한 것은 아닙니다. DID가 필요한 경우라면, DID를 생성합니다.
-1. Request presentation 생성  
-    - `verifier`가 `owner`에게 `presentation`을 요청할 때 request presentation을 `owner`에게 전달합니다. 이 때 `verifier`는 서명을 하여 전달하거나, 서명없이 전달하는 두 가지 방법이 있습니다. (참고: [Request Presentation](#request-presentation))
-1. Presentation token 검증
-    - `verifier`는 `owner`에게 받은 `presentation`과 그 안에 포함된 `credential`을 검증합니다. (참고: [Presentation Token Verify](#presentation-token-verify))
+The steps a `verifier` must take are described below.
+1. Generate a DID (See: [DID Document](#did-document))
+    - Technically, not all `verifiers` must have its DID. If it doesn't have its DID, you can skip this step
+1. Send a presentation request
+    - The `verifier` sends a presentation request to an `owner`. The `verifier` may optionally sign the request before sending it (See: [Presentation request]((#requesting-presentation)))
+1. Validate presentation
+    - The `verifier` validates the `presentation` that an `owner` sent, and the `credentials` included inside it. (See: [presentation verification](#presentation-verification))
 
 ## DID Document
+An `ICON DID` is managed on the ICON blockchain, and in order to create a DID and view or update its DID document, a transaction must be sent to a SCORE.
 
-`ICON DID`는 ICON blockchain 상에서 관리되며 등록 및 수정을 위해서는 SCORE에 transaction을 전송해야 합니다. 
+See: [ICON DID method specification](https://github.com/icon-project/icon-DID/blob/master/docs/ICON-DID-method.md)
 
-참고: [ICON DID method specification](https://github.com/icon-project/icon-DID/blob/master/docs/ICON-DID-method.md)
-
-SDK를 이용하여 DID 등록/수정에 필요한 transaction 데이터를 구성해 SCORE에 전송할 수 있고, 등록된 DID를 조회할 수 있습니다.
-
+This SDK can be used to create transactions that will be sent to a SCORE in order to create a DID and view or update its DID document.
 
 ### CreateDocument
+Creates a new DID document.
 
-새로운 DID document를 생성합니다.
+In order to successfully create a DID document you will have to send a transaction that includes the following information to a SCORE.
 
-DID document를 등록하기 위해서는 SCORE에 다음의 정보들을 포함한 transaction을 전송해야 합니다.
-
-- DID document에 등록할 public key 정보 (id, type, key value)
-- public key에 대응하는 private key로 서명한 데이터 (public key 소유 증명)
+- Information about the public key that will registered on the DID document (id, type, key, value)
+- Data that is signed by a private key corresponding to the public key (in order to prove that the public key is appropriately owned)
 
 ##### KeyProvider
 
-DID document 등록 및 수정에 필요한 정보를 보관하는 객체 생성
+Key providers are objects that store information needed in order to create or modify DID documents
 
-(SCORE에서는 서명 algorithm으로 ES256K만 지원합니다. - SCORE version: 0.9.1)
-
+(As of version 0.9.1, SCOREs only support ES256K as the signing algorithm)
 ```java
-// did document에 등록할 public key에 대한 정보
+// Information about the public key that will be registered on a DID document
 String keyId = "ES256K-key";
-// 보관할 key의 algorithm 정보
+// Information about the algorithm of the key
 Algorithm algorithm = AlgorithmProvider.create(AlgorithmProvider.Type.ES256K);
-// key provider 객체 생성 
+// Generate a KeyProvider instance
 KeyProvider keyProvider = algorithm.generateKeyProvider(keyId);
 
 ```
 
 ##### DidService
 
-Blockchain에 DID document를 등록하기 위해서 `DIDService` 객체를 생성합니다. 
+In order to create a DID document on the blockchain, you must instantiate a `DIDService` object. 
 
-Transaction을 전송하기 위해서 `IconService`와 `KeyWallet`객체가 필요합니다. (ICON-SDK-JAVA)
+You also need an `IconService` and `KeyWallet` instance in order to create a transaction. (Please refer to the documents of the ICON SDK)
 
 ```java
 IconService iconService = new IconService(new HttpProvider("https://url"));
@@ -85,32 +81,31 @@ KeyWallet wallet = KeyWallet.load(new Bytes("hx000...1"));
 DidService didService = new DidService(iconService, networkId, scoreAddress);
 ```
 
-`DidService`와 [KeyProvider](#keyprovider) 객체를 생성한 후, `DidService.create`를 호출하면 SCORE에 transaction을 전송합니다.
+After creating an instance of `DidService` and [KeyProvider](#keyprovider) respectively, you will be able to successfully send a transaction to a SCORE by calling `DidService.create`.
 
-(SCORE에서 EncodeType으로 BASE64만 지원합니다. - SCORE version: 0.9.1)
-
+(As of version 0.9.1, SCOREs only support Base64 as the EncodeType)
 ```java
-// public key의 string을 인코딩 방식 (Hex, Base64)
+// Encoding type used to encode the string of the public key
 PublicKeyProperty.EncodeType encodeType = PublicKeyProperty.EncodeType.BASE64;
-// SCORE에 DID 등록 요청을 위한 parameter string 생성
+// Create parameters that will be used when sending the DID registration request
 String param = ScoreParameter.create(keyProvider, encodeType);
-// SCORE 등록 요청 후, 결과 확인 (성공하면 DID document를 return)
+// Check results after registering a DID on the SCORE (on success, a DID document will be returned)
 Document doc = didService.create(wallet, param);
-doc.toJson();	// return json string
-// DID를 사용하기 위한 DidKeyHolder 생성하기
+doc.toJson();
+// A DidKeyHolder object must be instantiated in order to use the DID
 DidKeyHolder didKeyHolder = new DidKeyHolder.Builder(keyProvider)
                 .did(document.getId())
                 .build();
-// DidKeyHolder를 keystorefile 로 저장하기
+// Store the DidKeyHolder with a keystorefile
 Keystore.storeDidKeyHolder(password, didKeyHolder, "did.json");
 ```
 
-SCORE에서 DID 생성 및 등록에 성공하면 다음의 json string을 변환한 `Document`객체를 리턴합니다.
+After the DID is successfully created on the SCORE, the newly-created `Document` will be transformed into a JSON string and returned like the example below.
 
 ```json
 {
     "@context": "https://w3id.org/did/v1",
-    "id": "did:icon:0000b2eb749fe08cf8185ae057d73a9ed7f963b4f2e0ae8655bd",
+    "id": "did:icon:01:b2eb749fe08cf8185ae057d73a9ed7f963b4f2e0ae8655bd",
     "created": 529,
     "publicKey": [{
         "id": "ES256K-key",
@@ -124,63 +119,61 @@ SCORE에서 DID 생성 및 등록에 성공하면 다음의 json string을 변�
 }
 ```
 
+### readDocument
 
-
-### ReadDocument
-
-DidService의 `readDocument`를 호출해 등록된 DID의 document를 조회합니다. (참고: [DidService 객체 생성](#didservice))
+View a DID document by calling the `readDocument` function of a DidService instance. (See: [DidService instantiation](#didservice))
 
 ```java
-String did = "did:icon:0000...1";
+String did = "did:icon:01:...1";
 Document doc = didService.readDocument(did);
 ```
 
+### addPublicKey
 
-
-### AddPublicKey
-
-등록한 DID document에 public key를 추가합니다. (참고: [DID Document 등록](#createdocument), [DidService 객체 생성](#didservice))
+Add a public key to the already-created DID document (See: [Register DID document](#createdocument), [DidService instantiation](#didservice))
 
 ```java
-// SCORE에 등록된 did
-String did = "did:icon:0000...1";
+// DID registered on the SCORE
+String did = "did:icon:01:...1";
 
-// publickey 추가를 위한 인증 가능한 DidKeyHolder 생성
+// Create DidKeyHolder to add public key
 String authKeyId = "ES256K-key";
 String privateKey = "...";	// base64
 AlgorithmProvider.Type type = AlgorithmProvider.Type.ES256K
 Algorithm algorithm = AlgorithmProvider.create(type);
 PrivateKey pk = algorithm.byteToPrivateKey(EncodeType.BASE64.decode(privateKey));
+
+// Either manually
 DidKeyHolder didKeyHolder = new DidKeyHolder.Builder()
                 .did(did)
                 .keyId(authKeyId)
                 .type(type)
                 .privateKey(pk)
                 .build();
-// or keystorefile load
+// Or by loading keystorefile
 DidKeyHolder didKeyHolder = Keystore.loadDidKeyHolder(password, new File("did.json"));
 
-// 새로운 key 생성
+// Generate new key
 String keyId = "newKey";
 Algorithm algorithm = AlgorithmProvider.create(AlgorithmProvider.Type.ES256K);
 KeyProvider keyProvider = algorithm.generateKeyProvider(keyId);
 
-// SCORE에 DID publickey 를 추가 요청하기 위한 JWT 객체 생성
+// Create JWT needed in order to send a DID public key addition request to SCORE
 Jwt jwt = ScoreParameter.addKey(
     didKeyHolder, keyProvider, EncodeType.BASE64);
-// 서명한 jwt 생성
+// Create signed JWT
 String signedJwt = didKeyHolder.sign(jwt);
-// SCORE에 public key 추가 요청 후, 결과 확인
+// Send a public key addition request to SCORE, then check result
 Document doc = didService.addPublicKey(wallet, signedJwt));
-doc.toJson();	// return json string
+doc.toJson();
 ```
 
-Public key 추가에 성공하면 document가 리턴되고 SCORE에서 조회한 json string은 다음과 같습니다.
+After the successful addition of a public key, the document will be returned in the form of a JSON string like the example below.
 
 ```json
 {
     "@context": "https://w3id.org/did/v1",
-    "id": "did:icon:0000b2eb749fe08cf8185ae057d73a9ed7f963b4f2e0ae8655bd",
+    "id": "did:icon:01:b2eb749fe08cf8185ae057d73a9ed7f963b4f2e0ae8655bd",
     "created": 529,
     "publicKey": [{
         "id": "newKey",
@@ -202,48 +195,48 @@ Public key 추가에 성공하면 document가 리턴되고 SCORE에서 조회한
 }
 ```
 
-
-
 ### RevokePublicKey
 
-DID document에서 public key를 revoke합니다. Revoke를 하게 되면 해당 public key는 더 이상 유효하지 않습니다.
+Revoke a certain public key on a DID document. Doing this will invalidate the public key, thus making it unable to be used any further.
 
 ```java
-// SCORE에 등록된 did
-String did = "did:icon:0000...1";
+// DID that is registered on the SCORE
+String did = "did:icon:01:...1";
 
-// publickey revoke 하기 위한 인증 가능한 DidKeyHolder 생성
+// Create DidKeyHolder to revoke public key
 String authKeyId = "ES256K-key";
 String privateKey = "...";	// base64
 AlgorithmProvider.Type type = AlgorithmProvider.Type.ES256K
 Algorithm algorithm = AlgorithmProvider.create(type);
 PrivateKey pk = algorithm.byteToPrivateKey(EncodeType.BASE64.decode(privateKey));
+
+// Either manually,
 DidKeyHolder didKeyHolder = new DidKeyHolder.Builder()
                 .did(did)
                 .keyId(authKeyId)
                 .type(type)
                 .privateKey(pk)
                 .build();
-// or keystorefile load
+// Or by loading keystorefile
 DidKeyHolder didKeyHolder = Keystore.loadDidKeyHolder(password, new File("did.json"));
 
-// revoke할 public key id
+// Id of the public key that we are aiming to revoke
 String keyId = "newKey";
 
-// DID publickey revoke 요청을 위한 JWT 객체 생성
+// Create JWT in order to revoke a DID public key
 Jwt jwt = ScoreParameter.revokeKey(didKeyHolder, keyId);
 String signedJwt = didKeyHolder.sign(jwt);
-// SCORE에 public key revoke 요청 후, 결과 확인
+// Send a public key revocation request to SCORE, then check the result
 Document doc = didService.revokeKeyJwt(wallet, signedJwt);
-doc.toJson();	// return json string
+doc.toJson();
 ```
 
-Public key revoke에 성공하면 document가 리턴되고 결과는 다음과 같습니다.
+Upon a successful revocation of the public key, the document will be returned in the format below.
 
 ```json
 {
     "@context": "https://w3id.org/did/v1",
-    "id": "did:icon:0000b2eb749fe08cf8185ae057d73a9ed7f963b4f2e0ae8655bd",
+    "id": "did:icon:01:b2eb749fe08cf8185ae057d73a9ed7f963b4f2e0ae8655bd",
     "created": 529,
     "publicKey": [{
         "id": "newKey",
@@ -264,36 +257,30 @@ Public key revoke에 성공하면 document가 리턴되고 결과는 다음과 �
 }
 ```
 
-
-
-
-
-
 ## Credential
 
-DID의 owner는 `issuer`로부터 claim 인증 진행 후, 인증에 대한 확인서 `credential`을 발급받을 수 있습니다.
-
-
+After an `issuer` validates the claims of an `owner`, the `owner` can acquire the `credential` of the claims.
 
 ### Credential Request
 
-`credential`을 발급받기 위해서 owner는 다음의 JWT 토큰을 `issuer`에게 전달해야 합니다. 
-이 때 사용하는 DID는 blockchain에 등록되어 있어야 합니다. (참고: [DID Document 등록](#createdocument), [DidService 객체 생성](#didservice))
+In order to acquire a `credential`, an `owner` must send the following JWT to an `issuer`.
 
-다음과 같이 DID 정보를 포함한 `DidClaim` 객체를 생성하고 jwt 토큰을 발급합니다.
+The DID used in this process must be already registered on the blockchain (See: [DID Document Registration](#createdocument), [DidService object instantiation](#didservice))
+
+The following example creates a `DidClaim` object and issues a JWT.
 
 ```java
 
-// owner의 DID
-String did = "did:icon:0000...1";
+// DID of owner
+String did = "did:icon:01:...1";
 
-// issuer의 DID
-String issuerDid = "did:icon:0000...1";
+// DID of issuer
+String issuerDid = "did:icon:01:...1";
 
-// DID document에 등록된 publickey 중 사용할 keyId 정보
+// KeyId information of the public key that is registered on the DID document
 String keyId = "owner";
 AlgorithmProvider.Type type = AlgorithmProvider.Type.ES256K;
-// 사용할 publickey와 매칭되는 private key
+// Private key corresponding to the public key
 String privateKey = "...";	// base64
 Algorithm algorithm = AlgorithmProvider.create(type);
 PrivateKey pk = algorithm.byteToPrivateKey(EncodeType.BASE64.decode(privateKey));
@@ -304,14 +291,14 @@ DidKeyHolder ownerKeyHolder = new DidKeyHolder.Builder()
                 .privateKey(pk)
                 .build();
 
-// 요청할 credential의 claim type
+// Claim type of credential that will be requested
 Map claims = new HashMap();
 claims.put("email", "abc@icon.foundation");
 
-// 요청 관리를 위한 random 한 nonce 생성
+// Generate random nonce to use during request
 String nonce = Hex.toHexString(AlgorithmProvider.secureRandom().generateSeed(4));
 
-// ClaimRequest 객체 생성
+// Build instance of ClaimRequest
 ClaimRequest request = new ClaimRequest.Builder(ClaimRequest.Type.CREDENTIAL)
     .didKeyHolder(ownerKeyHolder)
     .requestClaims(claims)
@@ -321,22 +308,22 @@ ClaimRequest request = new ClaimRequest.Builder(ClaimRequest.Type.CREDENTIAL)
 String requestJwt = ownerKeyHolder.sign(request.getJwt());
 ```
 
-생성된 토큰 정보는 다음과 같습니다.  (참고: [jwt debugger](https://jwt.io))
+The created JWT is as follows. (See [JWT debugger](https://jwt.io))
 
 ```js
 // header
 {
   "alg": "ES256K",
-  "kid": "did:icon:0000e96721825d09683be1438800e976ab498a0cf4fafca29316#owner"
+  "kid": "did:icon:01:e96721825d09683be1438800e976ab498a0cf4fafca29316#owner"
 }
 // payload
 {
     "iat": 1553582482,
-    "iss": "did:icon:0000961b6cd64253fb28c9b0d3d224be5f9b18d49f01da390f08",
+    "iss": "did:icon:01:961b6cd64253fb28c9b0d3d224be5f9b18d49f01da390f08",
     "requestClaims": {
       "email": "abc@icon.foundation"
     },
-    "sub": "did:icon:0000961b6cd64253fb28c9b0d3d224be5f9b18d49f01da390f08",
+    "sub": "did:icon:01:961b6cd64253fb28c9b0d3d224be5f9b18d49f01da390f08",
     "type": [
       "REQ_CREDENTIAL",
       "email"
@@ -345,19 +332,17 @@ String requestJwt = ownerKeyHolder.sign(request.getJwt());
 // signature
 ```
 
+### Request Verification
 
+The request token created by an `owner` is validated using the method below. (See: [Credential Request](#credential_request))
 
-### Request Verify
-
-위에서 owner가 생성한 토큰을 다음과 같이 검증합니다 (참고: [Credential Request](#credential_request))
-
-토큰을 검증하기 위해서 필요한 owner의 public key는 blockchain에서 조회합니다. (참고: [DidService 객체 생성](#didservice))
+The public key of the owner is required in the process of validating the token, and can be acquired by querying the blockchain. (See: [DidService instantiation](#didservice))
 
 ```java
-// Owner로부터 전달받은 jwt 토큰
+// JWT received from the owner
 String token = "eyJ0eXA..";
 
-// 토큰으로부터 ClaimRequest 객체 생성
+// Using the token, create an instance of ClaimRequest 
 ClaimRequest claimRequest = ClaimRequest.valueOf(token);
 logger.debug("REQ_CREDENTIAL Info");
 logger.debug("  type : {}", claimRequest.getTypes());
@@ -367,42 +352,38 @@ logger.debug("  responseId : {}", claimRequest.getResponseId());
 logger.debug("  request date : {}", claimRequest.getRequestDate());
 logger.debug("  nonce : {}\n", claimRequest.getNonce());
 
-// Owner의 DID와 publickey-id 호출
+// Extract the Did and public key id of the Owner
 String did = claimRequest.getDid();
 String keyId = claimRequest.getKeyId();
 
-// blockchain에서 publicKey 조회
+// Query the public key from the blockchain
 Document ownerDocument = didService.readDocument(did);
 PublicKeyProperty publicKeyProperty = ownerDocument.getPublicKeyProperty(keyId);
 
-// owner의 public key가 revoke됐는지 확인
-// revoke된 publickey인 경우, 에러 리턴
+// Check if the public key of the owner has been revoked. If it has, return error
 boolean isRevoked = publicKeyProperty.isRevoked();
 
 PublicKey publicKey = publicKeyProperty.getPublicKey();
-// signature 확인
+// Check signature
 Jwt.VerifyResult verifyResult = claimRequest.verify(publicKey);
-verifyResult.isSuccess();		// verify 성공 여부
-verifyResult.getFailMessage();	// verify 실패 메시지 
+verifyResult.isSuccess();
+verifyResult.getFailMessage();
 ```
 
+### Credential
 
+After an issuer successfully validates a request from an owner, the issuer can issue a set of `credential` to the owner, which has the owner's DID and recently validated information embedded inside of it. Also, the issuer's DID must already be registered on the blockchain before this step can proceed. (See: [DID Document Registration](#createdocument))
 
-### Credential Token
-
-Issuer는 owner의 요청 확인에 성공하면 owner의 DID와 인증한 정보를 포함한 `credential`을 발급합니다. 
-이때, issuer의 DID는 blockchain에 등록되어 있어야 합니다. (참고: [DID Document 등록](#createdocument))
-
-Issuer의 DID 정보를 갖는 `KeyProvider` 객체를 생성 후, `credential` 객체를 생성합니다.
+The `credential` can be only be created after instantiating a `KeyProvider` that contains the issuer's DID information.
 
 ```java
-// issuer의 DID
-String did = "did:icon:0000...1";
+// DID of the issuer
+String did = "did:icon:01:...1";
 
-// DID document에 등록된 publickey에 대한 정보
+// Information about the public key used in the DID document
 String keyId = "EmailIssuer";
 AlgorithmProvider.Type type = AlgorithmProvider.Type.ES256K;
-// 사용할 publickey와 매칭되는 private key
+// private key corresponding to the public key
 String privateKey = "...";	// base64
 Algorithm algorithm = AlgorithmProvider.create(type);
 PrivateKey pk = algorithm.byteToPrivateKey(EncodeType.BASE64.decode(privateKey));
@@ -415,37 +396,37 @@ DidKeyHolder issuerKeyHolder = new DidKeyHolder.Builder()
 
 ClaimRequest claimRequest = ..;	// owner로부터 받은 request object
 
-// Credential 객체 생성
+// Create Credential instance
 Credential credential = new Credential.Builder()
     .didKeyHolder(issuerKeyHolder)
     .nonce(claimRequest.getNonce())  // (optional)
     .build();
 ```
 
-`credential`에 owner의 DID와 인증 정보를 추가하고 jwt 토큰을 발급합니다.
+Add the owner's DID and its claims to the `credential` and issue a JWT.
 
 ```java
-// Owner의 DID와 인증 정보를 셋팅
-String ownerDid = "did:icon:0000...1";
+// Configure owner's DID and credentials
+String ownerDid = "did:icon:01:...1";
 credential.setTargetDid(ownerDid);
 credential.addClaim("email", "abc@icon.foundation");
 
-// 인증 유효기간 설정
+// Set expiration date
 Date issued = new Date();
-// default 설정 정보
+// Default settings
 long duration = credential.getDuration() * 1000L;  // to milliseconds (for Date class)
 Date expiration = new Date(issued.getTime() + duration);
-// 서명한 crednetial token 발급
+// Issue the signed credential token
 String token = issuerKeyHolder.sign(credential.buildJwt(issued, expiration));
 ```
 
-생성된 토큰 정보는 다음과 같습니다. (참고 : [jwt debugger](https://jwt.io))
+The token is as follows. (See: [JWT debugger](https://jwt.io))
 
 ```js
 // header
 {
   "alg": "ES256K",
-  "kid": "did:icon:0000849625146b531abdff5c0f87acd8d1c20f927c8f7ecd96c3#EmailIssuer"
+  "kid": "did:icon:01:849625146b531abdff5c0f87acd8d1c20f927c8f7ecd96c3#EmailIssuer"
 }
 // payload
 {
@@ -454,8 +435,8 @@ String token = issuerKeyHolder.sign(credential.buildJwt(issued, expiration));
     },
     "exp": 1553667802,
     "iat": 1553581402,
-    "iss": "did:icon:000012802a771fa8f74d716366c170632010850587d56788cd76",
-    "sub": "did:icon:00005ea58f6949183cb9ba996f512f3ab56c2d88f0e459dd3f33",
+    "iss": "did:icon:01:12802a771fa8f74d716366c170632010850587d56788cd76",
+    "sub": "did:icon:01:5ea58f6949183cb9ba996f512f3ab56c2d88f0e459dd3f33",
     "type": [
       "CREDENTIAL",
       "email"
@@ -464,39 +445,35 @@ String token = issuerKeyHolder.sign(credential.buildJwt(issued, expiration));
 // signature
 ```
 
-
-
 ## Presentation
 
-`credential`을 서명한 `presentation`을 생성해서 `verifier`에게 전달하여 사용할 수 있습니다.
+A `presentation` including `credential` is signed and produced. The `credential` can then be provided to a `verifier`.
 
+### Requesting Presentation
 
-
-### Request Presentation
-
-`verifier`는 필요한 presentation을 다음과 같이 요청할 수 있습니다.
+A `verifier` can request a `presentation` by following the steps depicted below.
 
 ```java
-// presentation을 요청할 사용자의 DID
-String ownerDid = "did:icon:0000...1";
+// DID of an owner the verifier is sending the request to
+String ownerDid = "did:icon:01:...1";
 Date requestDate = new Date();
-// 필요한 인증 정보
+// Credentials that the verifier wishes to verify
 List<String> claimTypes = Arrays.asList("email");
 
-// Verifier의 DID가 없는 경우
+// If the verifier does not have a DID
 ClaimRequest request = new ClaimRequest.Builder(ClaimRequest.Type.PRESENTATION)
                 .algorithm(AlgorithmProvider.Type.NONE)
                 .responseId(ownerDid)
                 .requestDate(requestDate)
                 .requestClaimTypes(claimTypes)
                 .build();
-// 서명없는 JWT token
+// Unsigned JWT
 String unsigendJwt = request.compact();
 
-// Verifier의 DID가 있는 경우
+// If the verifier has an existing DID
 String keyId = "verifier";
 AlgorithmProvider.Type type = AlgorithmProvider.Type.ES256K;
-// 사용할 publickey 와 매칭되는 private key
+// Private key corresponding to the public key
 String privateKey = "...";	// base64
 Algorithm algorithm = AlgorithmProvider.create(type);
 PrivateKey pk = algorithm.byteToPrivateKey(EncodeType.BASE64.decode(privateKey));
@@ -507,7 +484,7 @@ DidKeyHolder verifierKeyHolder = new DidKeyHolder.Builder()
                 .privateKey(pk)
                 .build();
 
-// 요청 관리를 위한 random 한 nonce 생성
+// Create random nonce that will be used when sending request
 String nonce = Hex.toHexString(AlgorithmProvider.secureRandom().generateSeed(4));
 
 ClaimRequest request = new ClaimRequest.Builder(ClaimRequest.Type.PRESENTATION)
@@ -517,11 +494,11 @@ ClaimRequest request = new ClaimRequest.Builder(ClaimRequest.Type.PRESENTATION)
                 .requestClaimTypes(claimTypes)
       			.nonce(nonce)
                 .build();
-// 서명있는 JWT token
+// Signed JWT
 String sigendJwt = verifierKeyHolder.sign(request.getJwt());
 ```
 
-생성된 서명없는 토큰 정보는 다음과 같습니다. (참고: [jwt debugger](https://jwt.io))
+The resulting token is as follows. (See: [JWT debugger](https://jwt.io))
 
 ```json
 // header
@@ -531,8 +508,8 @@ String sigendJwt = verifierKeyHolder.sign(request.getJwt());
 // payload
 {
     "iat": 1553583104,
-    "iss": "did:icon:000012802a771fa8f74d716366c170632010850587d56788cd76",
-    "sub": "did:icon:00005ea58f6949183cb9ba996f512f3ab56c2d88f0e459dd3f33",
+    "iss": "did:icon:01:12802a771fa8f74d716366c170632010850587d56788cd76",
+    "sub": "did:icon:01:5ea58f6949183cb9ba996f512f3ab56c2d88f0e459dd3f33",
     "type": [
       "REQ_PRESENTATION",
       "email"
@@ -542,19 +519,19 @@ String sigendJwt = verifierKeyHolder.sign(request.getJwt());
 
 
 
-### Presentation Token
+### Presentation
 
-위에서 요청받은 credential에 대한 presentation을 생성해서 `verifier`에게 전달합니다.
+When a `verifier` requests certain `credentials` from an `owner`, the `owner` creates a `presentation` corresponding to the requested `credentials` and provides it to the `verifier`.
 
 ```java
-// owner의 DID
-String did = "did:icon:0000...1";
+// DID of owner
+String did = "did:icon:01:...1";
 
-// DID document에 등록된 publickey에 대한 정보
+// Info of public key registered on DID document
 String keyId = "owner";
 AlgorithmProvider.Type type = AlgorithmProvider.Type.ES256;
 
-// 사용할 publickey와 매칭되는 private key
+// Private key corresponding to the public key
 String privateKey = "...";	// base64
 Algorithm algorithm = AlgorithmProvider.create(type);
 PrivateKey pk = algorithm.byteToPrivateKey(EncodeType.BASE64.decode(privateKey));
@@ -565,9 +542,10 @@ DidKeyHolder ownerKeyHolder = new DidKeyHolder.Builder()
                 .privateKey(pk)
                 .build();
 
-ClaimRequest claimRequest = ..;	// verifier 로부터 받은 Request object
+// Request object that the verifier has sent
+ClaimRequest claimRequest = ..;
 
-// Presentation 객체 생성
+// Create presentation instance
 Presentation presentation = new Presentation.Builder()
                 .didKeyHolder(ownerKeyHolder)
 		      	    .nonce(request.getNonce())
@@ -575,28 +553,29 @@ Presentation presentation = new Presentation.Builder()
 
 ```
 
-Owner의 claim 정보를 추가하고 jwt 토큰을 발급합니다.
+Add the owner's claims and issue a JWT
+
 
 ```java
-// issuer에게 받은 credential 토큰
+// Credential token the the issuer has sent
 String credential = "eyJ0eXA...";
 
-// credential을 추가
+// Add credential
 presentation.addCredential(credential);
 
-// presentation의 default expiration time은 5분 (도용방지)
-// 서명한 presentation 토큰 발급
+// The default expiration time of a presentation token is 5 minutes (in order to prevent malicious requests)
+// Issue a signed presentation token
 String token = ownerKeyHolder.sign(presentation.buildJwt());
 ```
 
-생성된 토큰 정보는 다음과 같습니다.  (참고: [jwt debugger](https://jwt.io))
+The JWT is as follows. (See: [JWT debugger](https://jwt.io))
 
 ```js
 // header
 {
   "typ": "JWT",
   "alg": "ES256K",
-  "kid": "did:icon:0000e96721825d09683be1438800e976ab498a0cf4fafca29316#owner"
+  "kid": "did:icon:01:e96721825d09683be1438800e976ab498a0cf4fafca29316#owner"
 }
 // payload
 {
@@ -605,7 +584,7 @@ String token = ownerKeyHolder.sign(presentation.buildJwt());
     ],
     "exp": 1553586450,
     "iat": 1553586150,
-    "iss": "did:icon:00005ea58f6949183cb9ba996f512f3ab56c2d88f0e459dd3f33",
+    "iss": "did:icon:01:5ea58f6949183cb9ba996f512f3ab56c2d88f0e459dd3f33",
     "type": [
       "PRESENTATION",
       "email"
@@ -614,82 +593,84 @@ String token = ownerKeyHolder.sign(presentation.buildJwt());
 // signature
 ```
 
+### Presentation Verification
 
+A verifier can verify the presentation it has received from a owner using the following methods. (See: [Register presentation](#presentation))
 
-### Presentation Token verify
+The `verifier` must verify both the presentation token that the `owner` has issued and the credentials that an `issuer` has issued that is embedded inside the `owner`'s token.
 
-Verifier는 owner에게 받은 presentation을 다음과 같이 검증합니다. (참고: [Presentation Token 등록](#presentation-token))
-Verifier는 owner가 발급한 토큰과 토큰 안에 포함된 issuer가 발급한 토큰 둘 다 검증해야 합니다.
-토큰을 검증하기 위해서 필요한 owner와 issuer의 public key는 blockchain에서 조회합니다. (참고: [DidService 객체 생성](#didservice))
+The public keys of the owner and issuer are required in order to verify the token. These public keys can be viewed by querying the blockchain. (See: [DidService instantiation](#didservice));
 
-Owner 가 보낸 토큰을 검증합니다.
+The below steps should be followed to verify the token that an `owner` has sent.
 
 ```java
-// owner로부터 받은 jwt 토큰
+// JWT that the owner has sent
 String token = "eyJ0eX...";
 
-// 토큰의 정보를 토대로 presentation 객체 생성 
+// Create presentation instance using the token
 Presentation presentation = Presentation.valueOf(token);
-// Owner의 DID와 publickey-id 호출
+
+// Extract DID and public key id of the owner
 String ownerDid = presentation.getDid();
 String ownerKeyId = presentation.getKeyId();
 
-// blockchain에서 publicKey 조회
+// Query the public key from the blockchain
 Document ownerDocument = didService.readDocument(ownerDid);
 
-// owner의 public key가 revoke 됐는지 확인
+// Confirm the public key of the owner has been revoked
 PublicKeyProperty publicKeyProperty = ownerDocument.getPublicKeyProperty(ownerKeyId);
-// revoke 된 publickey인 경우, 에러 리턴 (revoke: true)
+// If public key of the owner has been revoked, return error (revoke: true)
 boolean isRevoked = publicKeyProperty.isRevoked();
 
 PublicKey publicKey = publicKeyProperty.getPublicKey();
 
-// verify
+// Verify results
 Jwt.VerifyResult verifyResult = Jwt.decode(token).verify(publicKey);
-verifyResult.isSuccess();		// verify 성공 여부
-verifyResult.getFailMessage();	// verify 실패 메시지 
+verifyResult.isSuccess();
+verifyResult.getFailMessage();
 ```
 
-`presentation` 토큰에 포함된 issuer가 발급한 `credential`을 검증합니다.
+Verify the `credential` that is embedded inside the `presentation` token
 
 ```java
-// 위에서 확인한 presentation 토큰을 전송한 owner의 did 
+
+// DID of the owner that sent the presentation token
 String ownerDid = "...owner did...";
 
-// Credential 호출
+// Extract credentials
 List<String> claims = credential.getClaims();
 for (String credentialJwt : claims) {
-    // 토큰의 정보를 토대로 Credential 객체 생성 
+    // Create Credential instance using the token
     Credential credential = Credential.valueOf(credentialJwt);
-    // Issuer의 DID와 publickey-id 호출
+    // Extract DID and public key id of the issuer
     String issuerDid = credential.getDid();
     String issuerKeyId = credential.getKeyId();
     
-    // blockchain에서 issuer의 publicKey 조회
+    // Query the public key of the issuer from the blockchain
     Document issuerDocument = didService.readDocument(issuerDid);
 
-    // owner의 public key가 revoke 됐는지 확인
+    // Check if the public key of the owner has been revoked
     PublicKeyProperty publicKeyProperty = issuerDocument.getPublicKeyProperty(issuerKeyId);
-    // revoke된 publickey인 경우, 에러 리턴 (revoke: true)
+    // If public key has been revoked, return error (revoke: true)
     boolean isRevoked = publicKeyProperty.isRevoked();
     
     PublicKey publicKey = publicKeyProperty.getPublicKey();
-    // verify
+
     Jwt.VerifyResult verifyResult = Jwt.decode(credentialJwt).verify(publicKey);
-    verifyResult.isSuccess();		// verify 성공 여부
-    verifyResult.getFailMessage();	// verify 실패 메시지 
+    verifyResult.isSuccess();
+    verifyResult.getFailMessage();
     
-    // issuer가 인증한 대상과 owner의 DID가 일치하는지 확인
+    // Check if owner's DID equals the subject that the issuer has verified
     boolean checkTarget = ownerDid.equals(credential.getSubject());
 }
 ```
 
-Owner와 issuer 검증 후, `credential` 객체에서 인증한 정보에 대해서 조회할 수 있습니다.
+After validating the owner and issuer, the verified claims can be viewed by extracting them from the `credential` object.
 
 ```java
-// 인증 타입 확인
+// Extract credential type
 String type = credential.getType();
-// 인증 정보 확인
+// Check claims
 Map<String, Object> claim = credential.getClaim();
 ```
 
@@ -698,7 +679,7 @@ Map<String, Object> claim = credential.getClaim();
 ## References
 
 - [did-java-sample](https://repo.theloop.co.kr/theloop/did-java-sample)
-- [데이터구조](<https://docs.google.com/presentation/d/1-SuzCWihZAYPtZmqNEhn24PWutKJjt-o2cfjtyBUnXE/edit?usp=sharing>)
+- [DID Structural Overview](<https://docs.google.com/presentation/d/1-SuzCWihZAYPtZmqNEhn24PWutKJjt-o2cfjtyBUnXE/edit?usp=sharing>)
 
 
 
@@ -720,7 +701,7 @@ Map<String, Object> claim = credential.getClaim();
 
 Download [the latest JAR](https://drive.google.com/open?id=1S8MK9w9ae9snXAtISXRKxjbFPvl4MXmu)
 
-dependency 추가
+Add dependencies
 
 ```gradle
 implementation "foundation.icon:icon-sdk:0.9.11"

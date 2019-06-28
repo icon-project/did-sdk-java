@@ -1,0 +1,4 @@
+rootProject.name = 'did-sdk-java'
+include 'lib'
+include 'sample'
+

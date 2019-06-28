@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+}
+
+allprojects {
+    group GROUP
+    version VERSION_NAME
+}
+
+subprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+task stage(dependsOn: ['clean', 'build'])

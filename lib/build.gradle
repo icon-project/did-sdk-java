@@ -1,0 +1,41 @@
+plugins {
+    id 'java-library'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    bouncycastleVersion = '1.60'
+    iconSdkVersion = '0.9.11'
+    gsonVersion = '2.8.0'
+    okhttpVersion = '3.11.0'
+    junitVersion = '5.4.0-RC2'
+    logbackVersion = '1.2.3'
+    javaJwtVersion = '3.5.0'
+}
+
+dependencies {
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation "org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion"
+    implementation "foundation.icon:icon-sdk:$iconSdkVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation "ch.qos.logback:logback-classic:$logbackVersion"
+
+    // test jjwt
+    testImplementation 'io.jsonwebtoken:jjwt-api:0.10.5'
+    testRuntimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.5'
+    testRuntimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.5') {
+        exclude group: 'org.json', module: 'json' //provided by Android natively
+    }
+    testImplementation 'io.jsonwebtoken:jjwt-jackson:0.10.5'
+}
+
+jar {
+    baseName = 'icon-did'
+}
