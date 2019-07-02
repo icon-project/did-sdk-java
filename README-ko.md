@@ -698,7 +698,6 @@ Map<String, Object> claim = credential.getClaim();
 ## References
 
 - [did-java-sample](https://repo.theloop.co.kr/theloop/did-java-sample)
-- [데이터구조](<https://docs.google.com/presentation/d/1-SuzCWihZAYPtZmqNEhn24PWutKJjt-o2cfjtyBUnXE/edit?usp=sharing>)
 
 
 
