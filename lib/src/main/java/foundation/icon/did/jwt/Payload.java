@@ -10,12 +10,14 @@ public class Payload {
     public static final String TYPE = "type";
     public static final String ISSUER = "iss";
     public static final String SUBJECT = "sub";
+    public static final String AUDIENCE = "aud";
     public static final String ISSUED_AT = "iat";
     public static final String EXPIRATION = "exp";
     public static final String JTI = "jti";
     public static final String CLAIM = "claim";
     public static final String CREDENTIAL = "credential";
     public static final String NONCE = "nonce";
+    public static final String VERSION = "version";
 
     private Map<String, Object> map;
     private List<String> timeClaimKeys;
@@ -48,6 +50,8 @@ public class Payload {
         return get(SUBJECT, String.class);
     }
 
+    public String getAud() { return get(AUDIENCE, String.class); }
+
     public Date getIat() {
         return get(ISSUED_AT, Date.class);
     }
@@ -71,6 +75,8 @@ public class Payload {
     public Map<String, Object> getMap() {
         return map;
     }
+
+    public String getVersion() { return get(VERSION, String.class); }
 
     public Object put(String name, Object value) {
         if (value == null) {
@@ -172,6 +178,11 @@ public class Payload {
             return this;
         }
 
+        public Builder aud(String aud) {
+            this.payload.put(Payload.AUDIENCE, aud);
+            return this;
+        }
+
         public Builder iat(Date iat) {
             this.payload.put(Payload.ISSUED_AT, dateToSeconds(iat));
             return this;
@@ -199,6 +210,11 @@ public class Payload {
 
         public Builder jti(String jti) {
             this.payload.put(Payload.JTI, jti);
+            return this;
+        }
+
+        public Builder version(String version) {
+            this.payload.put(Payload.VERSION, version);
             return this;
         }
 

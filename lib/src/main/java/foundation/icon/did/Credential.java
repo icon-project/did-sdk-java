@@ -33,6 +33,7 @@ public class Credential implements ConvertJwt {
     private Map<String, Object> claim;
     private String nonce;
     private String jti;
+    private String version;
 
     public Credential(IssuerDid issuerDid) {
         this.issuerDid = issuerDid;
@@ -85,6 +86,8 @@ public class Credential implements ConvertJwt {
         this.jti = jti;
     }
 
+    public void setVersion(String version) { this.version = version; }
+
     public String getTargetDid() {
         return targetDid;
     }
@@ -123,6 +126,8 @@ public class Credential implements ConvertJwt {
         return jti;
     }
 
+    public String getVersion() { return version; }
+
     @Override
     public int getDuration() {
         return expDuration;
@@ -134,6 +139,7 @@ public class Credential implements ConvertJwt {
         return new Jwt.Builder()
                 .alg(issuerDid.getAlgorithm())
                 .kid(kid)
+                .version(version)
                 .sub(targetDid)
                 .iss(issuerDid.getDid())
                 .iat(issued)

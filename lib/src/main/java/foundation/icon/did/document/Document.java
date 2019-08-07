@@ -8,7 +8,7 @@ import java.util.Map;
  * https://w3c-ccg.github.io/did-spec/#did-documents
  */
 public class Document {
-
+    private String version;
     private String id;
     private long created;
     private long updated;
@@ -16,12 +16,15 @@ public class Document {
     private List<AuthenticationProperty> authentication;
 
     private Document(Builder builder) {
+        version = builder.version;
         id = builder.id;
         created = builder.created;
         updated = builder.updated;
         publicKey = builder.publicKey;
         authentication = builder.authentication;
     }
+
+    public String getVersion() { return version; }
 
     public String getId() {
         return id;
@@ -53,6 +56,7 @@ public class Document {
 
 
     public static final class Builder {
+        private String version;
         private String id;
         private long created;
         private long updated;
@@ -60,6 +64,11 @@ public class Document {
         private List<AuthenticationProperty> authentication;
 
         public Builder() {
+        }
+
+        public Builder version(String val) {
+            version = val;
+            return this;
         }
 
         public Builder id(String val) {
@@ -95,7 +104,7 @@ public class Document {
     @Override
     public String toString() {
         return "Document{" +
-                "id='" + id + '\'' +
+                " id='" + id + '\'' +
                 ", created=" + created +
                 ", updated=" + updated +
                 ", publicKey=" + publicKey +
@@ -103,3 +112,4 @@ public class Document {
                 '}';
     }
 }
+

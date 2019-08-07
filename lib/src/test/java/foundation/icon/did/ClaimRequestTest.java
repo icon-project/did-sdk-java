@@ -30,6 +30,7 @@ public class ClaimRequestTest {
         String issuerDid = "did:icon:0000961b6cd64253fb28c9b0d3d224be5f9b18d49f01da390f08";
         List<String> claimTypes = Arrays.asList("email");
         List<String> claimValues = Arrays.asList("abc@icon.foundation");
+        String version = "1.0";
 
         Map claims = new HashMap();
         for (int i = 0; i < claimTypes.size(); i++) {
@@ -46,6 +47,7 @@ public class ClaimRequestTest {
                 .requestDate(requestDate)
                 .requestClaims(claims)
                 .responseId(issuerDid)
+                .version(version)
                 .build();
 
         String signedJwt = didKeyHolder.sign(request.getJwt());

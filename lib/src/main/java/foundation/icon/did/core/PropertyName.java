@@ -13,6 +13,7 @@ public class PropertyName {
     public static final String EC_CURVE_PARAM_SECP256K1 = "secp256k1";
 
     public static final String KEY_DOCUMENT_CONTEXT = "@context";
+    public static final String KEY_VERSION = "version";
     public static final String KEY_DOCUMENT_ID = "id";
     public static final String KEY_DOCUMENT_CREATED = "created";
     public static final String KEY_DOCUMENT_UPDATED = "updated";

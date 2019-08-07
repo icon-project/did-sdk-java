@@ -34,7 +34,7 @@ public class PresentationTest {
 
         String rawCredential = "eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDppY29uOjAwMDA5NjFiNmNkNjQyNTNmYjI4YzliMGQzZDIyNGJlNWY5YjE4ZDQ5ZjAxZGEzOTBmMDgjaXNzdWVyIn0.eyJjbGFpbSI6eyJFbWFpbCI6ImFhYUBpY29uLmZvdW5kYXRpb24ifSwiZXhwIjoxNTQ3ODIwMzg2LCJpYXQiOjE1NDc3MzM5ODYsImlzcyI6ImRpZDppY29uOjAwMDA5NjFiNmNkNjQyNTNmYjI4YzliMGQzZDIyNGJlNWY5YjE4ZDQ5ZjAxZGEzOTBmMDgiLCJub25jZSI6IjAzMDcxZjJkLThiZTAtNDAxNS04Y2I4LTg4YTI3M2FiZWY2NiIsInN1YiI6ImRpZDppY29uOjAwMDA5NjFiNmNkNjQyNTNmYjI4YzliMGQzZDIyNGJlNWY5YjE4ZDQ5ZjAxZGEzOTBmMDgiLCJ0eXBlIjpbIkVtYWlsIl19";
         String did = "did:icon:0000961b6cd64253fb28c9b0d3d224be5f9b18d49f01da390f08";
-
+        String version = "1.0";
         DidKeyHolder keyHolder = new DidKeyHolder.Builder()
                 .did(did)
                 .keyId(keyId)
@@ -47,6 +47,7 @@ public class PresentationTest {
                 .build();
         presentation.addCredential(rawCredential);
         presentation.setNonce("6a41b8a4-d18d-4e31-b5f8-f39b15db5827");
+        presentation.setVersion(version);
 
         long issuedTimestamp = 1545208842000L;
         Date issued = new Date(issuedTimestamp);

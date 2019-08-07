@@ -33,6 +33,7 @@ public class Presentation implements ConvertJwt {
     private List<String> credentials;
     private String nonce;
     private String jti;
+    private String version;
 
     public Presentation(IssuerDid issuerDid) {
         this.issuerDid = issuerDid;
@@ -85,6 +86,8 @@ public class Presentation implements ConvertJwt {
     }
 
 
+    public void setVersion(String version) { this.version = version; }
+
     public String getDid() {
         return issuerDid.getDid();
     }
@@ -111,6 +114,8 @@ public class Presentation implements ConvertJwt {
         return jti;
     }
 
+    public String getVersion() {return version; }
+
     @Override
     public int getDuration() {
         return EXP_DURATION;
@@ -129,6 +134,7 @@ public class Presentation implements ConvertJwt {
                 .credential(credentials)
                 .nonce(nonce)
                 .jti(jti)
+                .version(version)
                 .build();
     }
 
@@ -163,6 +169,7 @@ public class Presentation implements ConvertJwt {
         private IssuerDid issuerDid;
         private List<String> credentials;
         private String nonce;
+        private String version;
 
         public Builder() {
             this.issuerBuilder = new IssuerDid.Builder();
@@ -197,6 +204,11 @@ public class Presentation implements ConvertJwt {
 
         public Builder nonce(String nonce) {
             this.nonce = nonce;
+            return this;
+        }
+
+        public Builder version(String version) {
+            this.version = version;
             return this;
         }
 

@@ -25,7 +25,7 @@ public class ClaimRequest {
     public static final String REQ_CREDENTIAL = "REQ_CREDENTIAL";
     public static final String REQ_PRESENTATION = "REQ_PRESENTATION";
 
-    public static final String REQUEST_CLAIMS = "requestClaims";
+    public static final String REQUEST_CLAIM = "requestClaim";
 
     private Jwt jwt;
 
@@ -46,7 +46,7 @@ public class ClaimRequest {
     }
 
     public Map<String, Object> getClaims() {
-        return jwt.getPayload().get(REQUEST_CLAIMS, Map.class);
+        return jwt.getPayload().get(REQUEST_CLAIM, Map.class);
     }
 
     public List<String> getTypes() {
@@ -80,7 +80,7 @@ public class ClaimRequest {
     }
 
     public String getResponseId() {
-        return jwt.getPayload().getSub();
+        return jwt.getPayload().getAud();
     }
 
     public String getRequestId() {
@@ -90,6 +90,8 @@ public class ClaimRequest {
     public String getNonce() {
         return jwt.getPayload().getNonce();
     }
+
+    public String getVersion() { return  jwt.getPayload().getVersion(); }
 
     /**
      * Returns the ClaimRequest object representation of the String argument.
@@ -113,14 +115,22 @@ public class ClaimRequest {
         Header header = jwt.getHeader();
         List<String> types = payload.getTypes();
         Type type = Type.fromValue(types.remove(0));
+        String responseId = null;
+        if(payload.getAud() != null) {
+            responseId = payload.getAud();
+        }else if(payload.getSub() != null){
+            responseId = payload.getSub();
+        }
+
         return new Builder(type)
                 .algorithm(AlgorithmProvider.Type.fromName(header.getAlg()))
                 .kid(header.getKid())
-                .responseId(payload.getSub())
+                .responseId(responseId)
                 .requestDate(payload.getIat())
                 .requestClaimTypes(types)
-                .requestClaims(payload.get(REQUEST_CLAIMS, Map.class))
+                .requestClaims(payload.get(REQUEST_CLAIM, Map.class))
                 .nonce(payload.getNonce())
+                .version(payload.getVersion())
                 .encodedToken(jwt.getEncodedToken())
                 .build();
     }
@@ -138,6 +148,7 @@ public class ClaimRequest {
         private String[] encodedToken; // [0]:header, [1]:payload, [2]:signature
         private String nonce;
         private String jti;
+        private String version;
 
         public Builder(Type type) {
             this.type = type;
@@ -196,6 +207,11 @@ public class ClaimRequest {
             return this;
         }
 
+        public Builder version(String version) {
+            this.version = version;
+            return this;
+        }
+
         public Builder requestClaimTypes(List<String> claimTypes) {
             this.claimTypes = claimTypes;
             return this;
@@ -243,13 +259,14 @@ public class ClaimRequest {
                     .alg(algorithm.getName())
                     .kid(kid)
                     .iss(did)
-                    .sub(responseId)
+                    .aud(responseId)
                     .iat(requestDate)
-                    .put(REQUEST_CLAIMS, claims)
+                    .put(REQUEST_CLAIM, claims)
                     .encodedToken(encodedToken)
                     .type(buildTypes())
                     .nonce(nonce)
                     .jti(jti)
+                    .version(version)
                     .build();
             return new ClaimRequest(jwt);
         }
@@ -290,3 +307,4 @@ public class ClaimRequest {
         }
     }
 }
+

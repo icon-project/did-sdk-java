@@ -73,7 +73,12 @@ public class Converters {
         public JsonElement serialize(Document src, Type typeOfSrc, JsonSerializationContext context) {
             JsonObject document = new JsonObject();
 
-            document.addProperty(PropertyName.KEY_DOCUMENT_CONTEXT, PropertyName.VALUE_DOCUMENT_CONTEXT);
+            if(src.getVersion().equals("") || src.getVersion() == null){
+                document.addProperty(PropertyName.KEY_DOCUMENT_CONTEXT, PropertyName.VALUE_DOCUMENT_CONTEXT);
+            } else{
+                document.addProperty(PropertyName.KEY_VERSION, src.getVersion());
+            }
+
             document.addProperty(PropertyName.KEY_DOCUMENT_ID, src.getId());
             document.addProperty(PropertyName.KEY_DOCUMENT_CREATED, src.getCreated());
 
@@ -84,6 +89,8 @@ public class Converters {
 
             JsonArray authentication = parser.parse(gson().toJson(src.getAuthentication())).getAsJsonArray();
             document.add(PropertyName.KEY_DOCUMENT_AUTHENTICATION, authentication);
+
+
 
             if (src.getUpdated() != 0) {
                 document.addProperty(PropertyName.KEY_DOCUMENT_UPDATED, src.getUpdated());
@@ -118,6 +125,10 @@ public class Converters {
                     .created(document.get(PropertyName.KEY_DOCUMENT_CREATED).getAsLong())
                     .publicKey(publicKeymap)
                     .authentication(authentications);
+
+            if (document.has(PropertyName.KEY_VERSION)) {
+                builder.version(document.get(PropertyName.KEY_VERSION).getAsString());
+            }
 
             if (document.has(PropertyName.KEY_DOCUMENT_UPDATED)) {
                 builder.updated(document.get(PropertyName.KEY_DOCUMENT_UPDATED).getAsLong());

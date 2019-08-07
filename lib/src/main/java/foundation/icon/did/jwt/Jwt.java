@@ -181,6 +181,11 @@ public class Jwt {
             return this;
         }
 
+        public Builder aud(String aud) {
+            payloadBuilder.aud(aud);
+            return this;
+        }
+
         public Builder iat(Date iat) {
             payloadBuilder.iat(iat);
             return this;
@@ -208,6 +213,11 @@ public class Jwt {
 
         public Builder jti(String jti) {
             payloadBuilder.jti(jti);
+            return this;
+        }
+
+        public Builder version(String version) {
+            payloadBuilder.version(version);
             return this;
         }
 

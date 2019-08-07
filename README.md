@@ -104,7 +104,7 @@ After the DID is successfully created on the SCORE, the newly-created `Document`
 
 ```json
 {
-    "@context": "https://w3id.org/did/v1",
+    "version": "1.0",
     "id": "did:icon:01:b2eb749fe08cf8185ae057d73a9ed7f963b4f2e0ae8655bd",
     "created": 529,
     "publicKey": [{
@@ -172,7 +172,7 @@ After the successful addition of a public key, the document will be returned in 
 
 ```json
 {
-    "@context": "https://w3id.org/did/v1",
+    "version": "1.0",
     "id": "did:icon:01:b2eb749fe08cf8185ae057d73a9ed7f963b4f2e0ae8655bd",
     "created": 529,
     "publicKey": [{
@@ -235,7 +235,7 @@ Upon a successful revocation of the public key, the document will be returned in
 
 ```json
 {
-    "@context": "https://w3id.org/did/v1",
+    "version": "1.0",
     "id": "did:icon:01:b2eb749fe08cf8185ae057d73a9ed7f963b4f2e0ae8655bd",
     "created": 529,
     "publicKey": [{
@@ -277,6 +277,9 @@ String did = "did:icon:01:...1";
 // DID of issuer
 String issuerDid = "did:icon:01:...1";
 
+// DID version
+String version = "1.0";
+
 // KeyId information of the public key that is registered on the DID document
 String keyId = "owner";
 AlgorithmProvider.Type type = AlgorithmProvider.Type.ES256K;
@@ -304,6 +307,7 @@ ClaimRequest request = new ClaimRequest.Builder(ClaimRequest.Type.CREDENTIAL)
     .requestClaims(claims)
     .responseId(issuerDid)
     .nonce(nonce)    // (optional)
+    .version(version)
     .build();
 String requestJwt = ownerKeyHolder.sign(request.getJwt());
 ```
@@ -318,12 +322,13 @@ The created JWT is as follows. (See [JWT debugger](https://jwt.io))
 }
 // payload
 {
+    "version": "1.0",
     "iat": 1553582482,
     "iss": "did:icon:01:961b6cd64253fb28c9b0d3d224be5f9b18d49f01da390f08",
-    "requestClaims": {
+    "requestClaim": {
       "email": "abc@icon.foundation"
     },
-    "sub": "did:icon:01:961b6cd64253fb28c9b0d3d224be5f9b18d49f01da390f08",
+    "aud": "did:icon:01:961b6cd64253fb28c9b0d3d224be5f9b18d49f01da390f08",
     "type": [
       "REQ_CREDENTIAL",
       "email"
@@ -409,6 +414,7 @@ Add the owner's DID and its claims to the `credential` and issue a JWT.
 // Configure owner's DID and credentials
 String ownerDid = "did:icon:01:...1";
 credential.setTargetDid(ownerDid);
+credential.setVersion(version);
 credential.addClaim("email", "abc@icon.foundation");
 
 // Set expiration date
@@ -430,6 +436,7 @@ The token is as follows. (See: [JWT debugger](https://jwt.io))
 }
 // payload
 {
+    "version": "1.0",
     "claim": {
       "email": "abc@icon.foundation"
     },
@@ -466,6 +473,7 @@ ClaimRequest request = new ClaimRequest.Builder(ClaimRequest.Type.PRESENTATION)
                 .responseId(ownerDid)
                 .requestDate(requestDate)
                 .requestClaimTypes(claimTypes)
+                .version(version)
                 .build();
 // Unsigned JWT
 String unsigendJwt = request.compact();
@@ -493,6 +501,7 @@ ClaimRequest request = new ClaimRequest.Builder(ClaimRequest.Type.PRESENTATION)
                 .requestDate(requestDate)
                 .requestClaimTypes(claimTypes)
       			.nonce(nonce)
+      			.version(version)
                 .build();
 // Signed JWT
 String sigendJwt = verifierKeyHolder.sign(request.getJwt());
@@ -507,9 +516,10 @@ The resulting token is as follows. (See: [JWT debugger](https://jwt.io))
 }
 // payload
 {
+    "version": "1.0",
     "iat": 1553583104,
     "iss": "did:icon:01:12802a771fa8f74d716366c170632010850587d56788cd76",
-    "sub": "did:icon:01:5ea58f6949183cb9ba996f512f3ab56c2d88f0e459dd3f33",
+    "aud": "did:icon:01:5ea58f6949183cb9ba996f512f3ab56c2d88f0e459dd3f33",
     "type": [
       "REQ_PRESENTATION",
       "email"
@@ -548,7 +558,8 @@ ClaimRequest claimRequest = ..;
 // Create presentation instance
 Presentation presentation = new Presentation.Builder()
                 .didKeyHolder(ownerKeyHolder)
-		      	    .nonce(request.getNonce())
+		      	.nonce(request.getNonce())
+		      	.version(version)
                 .build();
 
 ```
@@ -579,6 +590,7 @@ The JWT is as follows. (See: [JWT debugger](https://jwt.io))
 }
 // payload
 {
+    "version": "1.0",
     "credential": [
       "eyJhb...E"
     ],
