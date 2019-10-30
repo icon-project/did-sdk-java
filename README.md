@@ -709,7 +709,7 @@ Map<String, Object> claim = credential.getClaim();
 
 ## Download
 
-Download [the latest JAR](https://drive.google.com/open?id=1S8MK9w9ae9snXAtISXRKxjbFPvl4MXmu)
+Download [the latest JAR](https://github.com/icon-project/did-sdk-java/raw/master/lib/build/libs/icon-did-0.8.6.jar)
 
 Add dependencies
 
