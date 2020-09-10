@@ -92,7 +92,7 @@ DidService didService = new DidService(iconService, networkId, scoreAddress);
 
 ```java
 // public key의 string을 인코딩 방식 (Hex, Base64)
-PublicKeyProperty.EncodeType encodeType = PublicKeyProperty.EncodeType.BASE64;
+EncodeType encodeType = EncodeType.BASE64;
 // SCORE에 DID 등록 요청을 위한 parameter string 생성
 String param = ScoreParameter.create(keyProvider, encodeType);
 // SCORE 등록 요청 후, 결과 확인 (성공하면 DID document를 return)
@@ -100,7 +100,7 @@ Document doc = didService.create(wallet, param);
 doc.toJson();	// return json string
 // DID를 사용하기 위한 DidKeyHolder 생성하기
 DidKeyHolder didKeyHolder = new DidKeyHolder.Builder(keyProvider)
-                .did(document.getId())
+                .did(doc.getId())
                 .build();
 // DidKeyHolder를 keystorefile 로 저장하기
 Keystore.storeDidKeyHolder(password, didKeyHolder, "did.json");
@@ -235,7 +235,7 @@ String keyId = "newKey";
 Jwt jwt = ScoreParameter.revokeKey(didKeyHolder, keyId);
 String signedJwt = didKeyHolder.sign(jwt);
 // SCORE에 public key revoke 요청 후, 결과 확인
-Document doc = didService.revokeKeyJwt(wallet, signedJwt);
+Document doc = didService.revokeKey(wallet, signedJwt);
 doc.toJson();	// return json string
 ```
 
